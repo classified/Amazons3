@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import AmazonS3
 
 class ViewController: UIViewController {
 
@@ -14,7 +15,20 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         
+        let url = write(text: "Test", to: "test")
         
+        let credentials = AmazonCredentials(bucketName: "YOUR BUCKET NAME", accessKey: "YOUR ACCESS KEY", secretKey: "YOUR SECRET KEY", region: .uswest1)
+        
+        AmazonUploader.setup(credentials: credentials)
+        
+        AmazonUploader.shared.uploadFile(fileUrl: url!, keyName: "mobile/test/abc.txt", permission: .private) { (success, url, error) in
+            
+            if success {
+                print("success")
+            }else{
+                print(error!)
+            }
+        }
         
     }
 
@@ -23,6 +37,15 @@ class ViewController: UIViewController {
         // Dispose of any resources that can be recreated.
     }
 
+    func write(text: String, to fileNamed: String, folder: String = "SavedFiles") -> URL? {
+        guard let path = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).first else { return  nil}
+        guard let writePath = NSURL(fileURLWithPath: path).appendingPathComponent(folder) else { return nil}
+        try? FileManager.default.createDirectory(atPath: writePath.path, withIntermediateDirectories: true)
+        let file = writePath.appendingPathComponent(fileNamed + ".txt")
+        try? text.write(to: file, atomically: false, encoding: String.Encoding.utf8)
+        
+        return file
+    }
 
 }
 
