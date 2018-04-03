@@ -221,7 +221,7 @@ public class AmazonUploader {
         
     }
     
-    //MARK: Download file
+    //MARK: Download file for private files
     public func downloadFile(keyName name:String ,progressBlock: @escaping (_ task:AWSS3TransferUtilityTask,
         _ progress:Progress) -> Void, completed: @escaping (_ isSuccess: Bool, _ url: URL? , _ error : Error?) -> Void) {
         let expression = AWSS3TransferUtilityDownloadExpression()
