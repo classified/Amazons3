@@ -56,24 +56,24 @@ public class AmazonUploader {
     //MARK: Intialize local variables
     fileprivate func initializeUploader(){
         if validateData() {
-        
+            
             fileURL.removeAll()
             currentIndex = 0
             
         }
-
+        
     }
     
     fileprivate func validateData() -> Bool {
-        if AmazonUploader.credentials.bucketName?.characters.count == 0 {
+        if AmazonUploader.credentials.bucketName?.count == 0 {
             fatalError("bucket name can not be blank")
         }
         
-        if AmazonUploader.credentials.accessKey?.characters.count == 0 {
+        if AmazonUploader.credentials.accessKey?.count == 0 {
             fatalError("access key can not be blank")
         }
         
-        if AmazonUploader.credentials.secretKey?.characters.count == 0 {
+        if AmazonUploader.credentials.secretKey?.count == 0 {
             fatalError("secret key can not be blank")
         }
         
@@ -93,7 +93,7 @@ public class AmazonUploader {
         uploadRequest?.body = url
         // we will track progress through an AWSNetworkingUploadProgressBlock
         uploadRequest?.uploadProgress = {(bytesSent:Int64, totalBytesSent:Int64, totalBytesExpectedToSend:Int64) in
-        
+            
         }
         
         let transferManager:AWSS3TransferManager = AWSS3TransferManager.default()
@@ -128,7 +128,7 @@ public class AmazonUploader {
                 }
             }
         }
-    
+        
     }
     
     //MARK: Upload with normal manager
@@ -213,12 +213,50 @@ public class AmazonUploader {
                 }
                 
                 if let _ = task.result {
-
+                    
                 }
                 
                 return nil
         }
         
+    }
+    
+    //MARK: Download file
+    public func downloadFile(keyName name:String ,progressBlock: @escaping (_ task:AWSS3TransferUtilityTask,
+        _ progress:Progress) -> Void, completed: @escaping (_ isSuccess: Bool, _ url: URL? , _ error : Error?) -> Void) {
+        let expression = AWSS3TransferUtilityDownloadExpression()
+        expression.progressBlock = {(task, progress) in DispatchQueue.main.async(execute: {
+            // Do something e.g. Update a progress bar.
+            progressBlock(task,progress)
+            
+        })
+        }
+        
+        var completionHandler: AWSS3TransferUtilityDownloadCompletionHandlerBlock?
+        completionHandler = { (task, URL, data, error) -> Void in
+            DispatchQueue.main.async(execute: {
+                // Do something e.g. Alert a user for transfer completion.
+                // On failed downloads, `error` contains the error object.
+                completed(error != nil ? false : true, URL,error)
+            })
+        }
+        
+        let transferUtility = AWSS3TransferUtility.default()
+        transferUtility.downloadData(
+            fromBucket: AmazonUploader.credentials.bucketName!,
+            key: name,
+            expression: expression,
+            completionHandler: completionHandler
+            ).continueWith {
+                (task) -> AnyObject! in if let error = task.error {
+                    
+                }
+                
+                if let _ = task.result {
+                    // Do something with downloadTask.
+                }
+                return nil
+        }
     }
     
     
@@ -228,7 +266,7 @@ public class AmazonUploader {
                 task.cancel()
                 // TODO we should re-trigger an upload task for this file
             } else {
-
+                
             }
         }
         
@@ -242,11 +280,11 @@ public class AmazonUploader {
         transferUtility.getUploadTasks().continueWith { task in
             if let tasks = task.result as? [AWSS3TransferUtilityUploadTask] {
                 if tasks.isEmpty {
-
+                    
                 } else {
-
+                    
                     for task in tasks {
-
+                        
                         task.resume()
                     }
                     
@@ -268,5 +306,5 @@ public class AmazonUploader {
         }
         return "application/octet-stream"
     }
-
+    
 }
