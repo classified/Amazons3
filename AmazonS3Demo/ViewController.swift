@@ -17,7 +17,7 @@ class ViewController: UIViewController {
         
         let url = write(text: "Test", to: "test")
         
-        let credentials = AmazonCredentials(bucketName: "YOUR BUCKET NAME", accessKey: "YOUR ACCESS KEY", secretKey: "YOUR SECRET KEY", region: .uswest1)
+        let credentials = AmazonCredentials(bucketName: "YOUR BUCKET NAME", accessKey: "YOUR ACCESS KEY", secretKey: "YOUR SECRET KEY", region: .USWest1)
         
         AmazonUploader.setup(credentials: credentials)
         
@@ -29,7 +29,6 @@ class ViewController: UIViewController {
                 print(error!)
             }
         }
-        
     }
 
     override func didReceiveMemoryWarning() {

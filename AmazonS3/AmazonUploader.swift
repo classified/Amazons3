@@ -82,6 +82,11 @@ public class AmazonUploader {
     
     
     //MARK: Upload with normal manager
+    /**
+     * url: File URL
+     * name: File name
+    **/
+ 
     public func uploadFile(fileUrl url: URL,keyName name:String , permission ACL:AWSS3ObjectCannedACL , completed: @escaping (_ isSuccess: Bool,_ url: String?, _ error : Error?) -> Void) {
         
         let uploadRequest = AWSS3TransferManagerUploadRequest()
@@ -208,7 +213,7 @@ public class AmazonUploader {
                                     }
             }
             .continueWith { task in
-                if let error = task.error {
+                if task.error != nil {
                     completed(false,nil,task.error)
                 }
                 
@@ -248,7 +253,7 @@ public class AmazonUploader {
             expression: expression,
             completionHandler: completionHandler
             ).continueWith {
-                (task) -> AnyObject! in if let error = task.error {
+                (task) -> AnyObject! in if task.error != nil {
                     
                 }
                 
